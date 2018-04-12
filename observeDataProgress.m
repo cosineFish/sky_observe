@@ -12,7 +12,10 @@ else
     splitNum = ceil(sizeofFile/1024);
 end
 format_data = '';
-noiseInjectNum = 0;%gainInjectNum = 0;
+noiseInjectNum = 0;gainInjectNum = 0;
+%NOISE_FLAG = 0;GAIN_FLAG = 1;
+global gainOrNoiseFlag;
+gainOrNoiseFlag = struct('GAIN',1,'NOISE',2);
 for i = 1:1:22
     format_data = strcat(format_data,'%f');
 end
@@ -46,18 +49,18 @@ while ~feof(fidin)         %判断是否为文件末尾
         end
         if current_sec_time-last_sec_time > 70
             noiseInjectNum = noiseInjectNum + 1;
-            xlabel_noise_time{noiseInjectNum} = [num2str(current_hour,'%02d'),':',num2str(current_min,'%02d'),...
-                ':',num2str(current_sec,'%02d')];
+%             xlabel_noise_time{noiseInjectNum} = [num2str(current_hour,'%02d'),':',num2str(current_min,'%02d'),...
+%                 ':',num2str(current_sec,'%02d')];
             for i = 1:8
                 delta_K_Brt(noiseInjectNum,i) = K_Brt(lineNum,i) - K_Brt(lineNum-1,i);
                 delta_V_Brt(noiseInjectNum,i) = V_Brt(lineNum,i) - V_Brt(lineNum-1,i);
             end
-%         elseif current_sec_time-last_sec_time > 50
-%             gainInjectNum = gainInjectNum + 1;
-%             for i = 1:8
-%                 gain_delta_K_Brt(gainInjectNum,i) = K_Brt(lineNum,i) - K_Brt(lineNum-1,i);
-%                 gain_delta_V_Brt(gainInjectNum,i) = V_Brt(lineNum,i) - V_Brt(lineNum-1,i);
-%             end
+        elseif current_sec_time-last_sec_time > 50
+            gainInjectNum = gainInjectNum + 1;
+            for i = 1:8
+                gain_delta_K_Brt(gainInjectNum,i) = K_Brt(lineNum,i) - K_Brt(lineNum-1,i);
+                gain_delta_V_Brt(gainInjectNum,i) = V_Brt(lineNum,i) - V_Brt(lineNum-1,i);
+            end
         end
         last_sec_time = current_sec_time;
     else
@@ -69,22 +72,25 @@ save('checkdata_num.mat','lineNum', 'splitNum', 'timeNum');
 global dateStr;
 dateStr = [num2str(year,'%02d'),num2str(month,'%02d'),num2str(day,'%02d')];
 global xlsFilePath;
-xlsFilePath = ['brt_data_',num2str(year,'%02d'),num2str(month,'%02d'),'.xls'];
+xlsFilePath = ['brt_delta_',num2str(year,'%02d'),num2str(month,'%02d'),'.xls'];
 for i = 1:timeNum
     xlabel_vol_str = [num2str(hour(i),'%02d'),':',num2str(minute(i),'%02d')];
     xticklabel{i} = xlabel_vol_str;
 end
-save checkdata_xtick.mat xticklabel xlabel_noise_time
+save checkdata_xtick.mat xticklabel% xlabel_noise_time
 global figure_num;figure_num = 0;
 %画亮温曲线
 plot_brt(K_Brt,'K');
 plot_brt(V_Brt,'V');
 %画噪声注入定标导致的亮温变化曲线
-plot_delta_brt(delta_K_Brt,'K');
-plot_delta_brt(delta_V_Brt,'V');
+plot_delta_brt(delta_K_Brt,'K',gainOrNoiseFlag.NOISE);
+plot_delta_brt(delta_V_Brt,'V',gainOrNoiseFlag.NOISE);
+%画增益定标导致的亮温变化曲线
+plot_delta_brt(gain_delta_K_Brt,'K',gainOrNoiseFlag.GAIN);
+plot_delta_brt(gain_delta_V_Brt,'V',gainOrNoiseFlag.GAIN);
 %把表格保存到excel，注意excel文件太大（190KB左右）可能导致数据写不进去的情况
 global sheetNum;
-sheetNum = 1;
+sheetNum = 0;
 global positionRowNum;
 positionRowNum = 0;
 saveTableData();

@@ -1,6 +1,6 @@
-function plot_delta_brt(delta_brt,receiver_name)
-    global dateStr;global figure_num;
-    load checkdata_xtick.mat xlabel_noise_time
+function plot_delta_brt(delta_brt,receiver_name,gainNoiseFlag)
+    global dateStr;global figure_num;global gainOrNoiseFlag;
+    %load checkdata_xtick.mat xlabel_noise_time
     for channel_num = 1:8
         average_value(channel_num) = mean(delta_brt(:,channel_num));
         std_value(channel_num) = std(delta_brt(:,channel_num));
@@ -13,6 +13,13 @@ function plot_delta_brt(delta_brt,receiver_name)
         brt_delta = ceil(max(temp) * 100) / 100.0;
     else
         brt_delta = ceil(max(pp_value) * 100) / 100.0;
+    end
+    if gainNoiseFlag == gainOrNoiseFlag.GAIN
+        title_keyword = '增益定标'; 
+        mat_name = 'gain_delta_brt.mat';
+    elseif gainNoiseFlag == gainOrNoiseFlag.NOISE
+        title_keyword = '噪声注入定标';
+        mat_name = 'noise_delta_brt.mat';
     end
     channel_num = 0;
     for num = 1:2
@@ -30,11 +37,11 @@ function plot_delta_brt(delta_brt,receiver_name)
             ylnew = [minValue  maxValue];
             set(v_gca(fig_num), 'Ylim', ylnew);
             set(v_gca(fig_num),'ytick',minValue:(brt_delta/5):(minValue + brt_delta));
-            if length(xlabel_noise_time) <= 6
-                set(gca,'xtick',1:1:length(xlabel_noise_time));
-                set(gca,'xticklabel',xlabel_noise_time);
-            end
-            xlabel('时间/(时:分:秒)');
+%             if length(xlabel_noise_time) <= 6
+%                 set(gca,'xtick',1:1:length(xlabel_noise_time));
+%                 set(gca,'xticklabel',xlabel_noise_time);
+%             end
+            xlabel('次序');
             ylabel('亮温差值/K');
             title(['通道',num2str(channel_num)]);
             set(gca,'FontSize',14);
@@ -42,17 +49,17 @@ function plot_delta_brt(delta_brt,receiver_name)
             hold on;
         end
         suptitle([receiver_name,...
-            '波段接收机由噪声注入定标导致的各通道亮温差值曲线（测量日期:',dateStr,'）']);
+            '波段接收机由',title_keyword,'带来的各通道亮温差值曲线（测量日期:',dateStr,'）']);
         set (gcf,'Position',[100,100,1000,800], 'color','w');
         hold off;
         figure_num = figure_num + 1;
         save2word([dateStr,'brt_report.doc'],['-f',num2str(figure_num)]);
     end
     if receiver_name == 'k' || receiver_name == 'K'
-        K_delta_brt = [average_value;std_value;pp_value];
-        save('data_delta_brt.mat', 'K_delta_brt');
+        K_delta_brt = [average_value;std_value;max_value];
+        save(mat_name, 'K_delta_brt');
     else
-        V_delta_brt = [average_value;std_value;pp_value];
-        save('data_delta_brt.mat', 'V_delta_brt','-append');
+        V_delta_brt = [average_value;std_value;max_value];
+        save(mat_name, 'V_delta_brt','-append');
     end
 end
