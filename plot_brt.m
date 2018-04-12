@@ -46,7 +46,7 @@ function plot_brt(brt,receiver_name)
         set (gcf,'Position',[100,100,1000,800], 'color','w');
         hold off;
         figure_num = figure_num + 1;
-        save2word([dateStr,'brt_report.doc'],['-f',num2str(figure_num)]);
+        save2word([dateStr,'sigleBrt_report.doc'],['-f',num2str(figure_num)]);
     end
     if receiver_name == 'k' || receiver_name == 'K'
         K_data_brt = [average_value;std_value;pp_value];

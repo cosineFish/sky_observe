@@ -22,6 +22,7 @@ function saveTableData()
     for i = 1:8
         cnames(i) = {['通道',num2str(i)]};
     end
+    rnames = {'均值/K','标准差','最大值/K'};
     title = ['K波段亮温差值(测量日期:',dateStr,')'];
     write2xls(xlsFilePath,title,cnames,K_delta_brt,length(cnames));
     title = ['V波段亮温差值(测量日期:',dateStr,')'];

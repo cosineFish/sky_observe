@@ -84,7 +84,7 @@ plot_delta_brt(delta_K_Brt,'K');
 plot_delta_brt(delta_V_Brt,'V');
 %把表格保存到excel，注意excel文件太大（190KB左右）可能导致数据写不进去的情况
 global sheetNum;
-sheetNum = 1;
+sheetNum = 2;
 global positionRowNum;
 positionRowNum = 0;
 saveTableData();

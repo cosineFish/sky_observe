@@ -34,7 +34,7 @@ function plot_delta_brt(delta_brt,receiver_name)
                 set(gca,'xtick',1:1:length(xlabel_noise_time));
                 set(gca,'xticklabel',xlabel_noise_time);
             end
-            xlabel('时间/(时:分:秒)');
+            xlabel('次序');
             ylabel('亮温差值/K');
             title(['通道',num2str(channel_num)]);
             set(gca,'FontSize',14);
@@ -46,13 +46,13 @@ function plot_delta_brt(delta_brt,receiver_name)
         set (gcf,'Position',[100,100,1000,800], 'color','w');
         hold off;
         figure_num = figure_num + 1;
-        save2word([dateStr,'brt_report.doc'],['-f',num2str(figure_num)]);
+        save2word([dateStr,'sigleBrt_report.doc'],['-f',num2str(figure_num)]);
     end
     if receiver_name == 'k' || receiver_name == 'K'
-        K_delta_brt = [average_value;std_value;pp_value];
+        K_delta_brt = [average_value;std_value;max_value];
         save('data_delta_brt.mat', 'K_delta_brt');
     else
-        V_delta_brt = [average_value;std_value;pp_value];
+        V_delta_brt = [average_value;std_value;max_value];
         save('data_delta_brt.mat', 'V_delta_brt','-append');
     end
 end
