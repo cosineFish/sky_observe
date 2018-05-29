@@ -1,21 +1,20 @@
-function plot_brt(brt,receiver_name)
-    load checkdata_xtick.mat xticklabel
-    load('checkdata_num.mat','lineNum', 'splitNum', 'timeNum');
-    global dateStr;
+function plot_brt(time,brt,receiver_name)
+    global dateStr;global figure_num;
+    figure_num = figure_num + 1;
+    average_value = mean(brt);
+    std_value = std(brt);
+    pp_value = max(brt) - min(brt);
+    xData = linspace(time(1),time(end),5);
     channel_num = 0;
     for num = 1:2
         figure('name',[num2str(num),receiver_name,'-亮温曲线']);
         for fig_num = 1 : 4
             channel_num = channel_num + 1;
-            average_value(channel_num) = mean(brt(:,channel_num));
-            std_value(channel_num) = std(brt(:,channel_num));
-            pp_value(channel_num) = max(brt(:,channel_num)) - min(brt(:,channel_num));
             subplot(2,2,fig_num);
-            plot(1:1:lineNum ,brt(:,channel_num));
-            v_gca(fig_num) = gca;
-            %set(gca,'xtick',MIN_VALUE:T_STEP:MAX_VALUE);
-            set(gca,'xtick',1:splitNum:timeNum*splitNum +1);
-            set(gca,'xticklabel',xticklabel);
+            plot(datenum(time) ,brt(:,channel_num));
+            ax = gca;
+            ax.XTick = datenum(xData);
+            datetick(ax,'x','HH:MM','keepticks');
             minValue = floor(min(brt(:,channel_num))*10)/10;maxValue= max(ceil(brt(:,channel_num)));
             if maxValue - minValue <= 2
                 maxValue = minValue + 1;
@@ -32,7 +31,8 @@ function plot_brt(brt,receiver_name)
         suptitle([receiver_name,...
             '波段接收机各通道的亮温曲线（测量日期：',dateStr,'）']);
         set (gcf,'Position',[100,100,1000,800], 'color','w');
-        hold off;
+        saveas(gcf,[dateStr,'-f',num2str(figure_num)],'png');
+        hold off;        
     end
     if receiver_name == 'k' || receiver_name == 'K'
         K_data_brt = [average_value;std_value;pp_value];
